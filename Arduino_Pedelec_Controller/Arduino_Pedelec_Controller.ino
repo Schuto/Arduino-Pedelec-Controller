@@ -258,21 +258,21 @@ boolean first_aid_ignore_poti = false;
 boolean first_aid_ignore_throttle = false;
 
 // Forward declarations for compatibility with new gcc versions
-void pas_change();
-void pas_change_thun(boolean signal);
-void speed_change();
-void send_serial_data();
-void handle_dspc();
-void read_eeprom();
+static void pas_change();
+static void pas_change_thun(boolean signal);
+static void speed_change();
+static void send_serial_data();
+static void handle_dspc();
+static void read_eeprom();
 void save_eeprom();
 void save_shutdown();
-void handle_unused_pins();
-void send_bluetooth_data();
-void read_current_torque();
-int analogRead_noISR(uint8_t pin);
+static void handle_unused_pins();
+static void send_bluetooth_data();
+static void read_current_torque();
+static int analogRead_noISR(uint8_t pin);
 
 #ifdef DEBUG_MEMORY_USAGE
-int memFree()
+static int memFree()
 {
     extern int __heap_start, *__brkval;
     int next_pointer;
@@ -862,7 +862,7 @@ ISR(INT5_vect)
 
 #if HARDWARE_REV >= 20
 #ifdef SUPPORT_XCELL_RT
-void pas_change_thun(boolean signal)
+static void pas_change_thun(boolean signal)
 {
     if (signal)
         pedaling=bitRead(PINE,5);
@@ -883,7 +883,7 @@ void pas_change_thun(boolean signal)
 #endif
 
 #ifdef SUPPORT_XCELL_RT
-void read_current_torque() //this reads the current torque value
+static void read_current_torque() //this reads the current torque value
 {
     torquevalues[torqueindex]=analogRead(option_pin)-torque_zero;
     torqueindex++;
@@ -894,7 +894,7 @@ void read_current_torque() //this reads the current torque value
 #endif
 
 #ifdef SUPPORT_PAS
-void pas_change()       //Are we pedaling? PAS Sensor Change------------------------------------------------------------------------------------------------------------------
+static void pas_change()       //Are we pedaling? PAS Sensor Change------------------------------------------------------------------------------------------------------------------
 {
     if (last_pas_event>(millis()-10)) return;
     boolean pas_stat=digitalRead(pas_in);
@@ -924,7 +924,7 @@ void pas_change()       //Are we pedaling? PAS Sensor Change--------------------
 #warning PAS sensor support is required for legal operation of a Pedelec  by EU-wide laws except Austria or Swiss.
 #endif
 
-void speed_change()    //Wheel Sensor Change------------------------------------------------------------------------------------------------------------------
+static void speed_change()    //Wheel Sensor Change------------------------------------------------------------------------------------------------------------------
 {
 #ifdef SUPPORT_FIRST_AID_MENU
     if (first_aid_ignore_speed)
@@ -950,7 +950,7 @@ void speed_change()    //Wheel Sensor Change------------------------------------
 }
 
 
-void serial_android(HardwareSerial* localSerial)
+static void serial_android(HardwareSerial* localSerial)
 { 
 #if (SERIAL_MODE & SERIAL_MODE_ANDROID)||(BLUETOOTH_MODE & BLUETOOTH_MODE_ANDROID)
     localSerial->print(voltage,1);
@@ -977,7 +977,7 @@ void serial_android(HardwareSerial* localSerial)
 #endif
 }
 
-void serial_logview(HardwareSerial* localSerial)
+static void serial_logview(HardwareSerial* localSerial)
 { 
 #if (SERIAL_MODE & SERIAL_MODE_LOGVIEW)||(BLUETOOTH_MODE & BLUETOOTH_MODE_LOGVIEW)
     localSerial->print(MY_F("$1;1;0;"));
@@ -1009,7 +1009,7 @@ void serial_logview(HardwareSerial* localSerial)
 #endif
 }
 
-void serial_debug(HardwareSerial* localSerial)
+static void serial_debug(HardwareSerial* localSerial)
 { 
 #if (SERIAL_MODE & SERIAL_MODE_DEBUG)||(BLUETOOTH_MODE & BLUETOOTH_MODE_DEBUG)
 #ifdef DEBUG_MEMORY_USAGE
@@ -1060,7 +1060,7 @@ void serial_debug(HardwareSerial* localSerial)
 #endif
 }
 
-void serial_mmc(HardwareSerial* localSerial)
+static void serial_mmc(HardwareSerial* localSerial)
 { 
 #if (SERIAL_MODE & SERIAL_MODE_MMC)||(BLUETOOTH_MODE & BLUETOOTH_MODE_MMC)
     localSerial->print((int)(voltage_display*10));
@@ -1079,7 +1079,7 @@ void serial_mmc(HardwareSerial* localSerial)
 #endif
 }
 
-void serial_ios(HardwareSerial* localSerial)
+static void serial_ios(HardwareSerial* localSerial)
 { 
 #if (SERIAL_MODE & SERIAL_MODE_IOS)||(BLUETOOTH_MODE & BLUETOOTH_MODE_IOS)
     localSerial->print(voltage,1);
@@ -1112,7 +1112,7 @@ void serial_ios(HardwareSerial* localSerial)
 #endif
 }
 
-void send_bluetooth_data() //send bluetooth data
+static void send_bluetooth_data() //send bluetooth data
 {
 #if HARDWARE_REV >=20
 #if (BLUETOOTH_MODE & BLUETOOTH_MODE_ANDROID)
@@ -1137,7 +1137,7 @@ void send_bluetooth_data() //send bluetooth data
 #endif // HARDWARE_REV>=20
 }
 
-void send_serial_data()  //send serial data
+static void send_serial_data()  //send serial data
 {
 #if (SERIAL_MODE & SERIAL_MODE_ANDROID)
     serial_android(&Serial);
@@ -1182,7 +1182,7 @@ void activate_new_profile()
     }
 }
 
-void handle_dspc()
+static void handle_dspc()
 {
 #ifdef SUPPORT_DSPC01
     if (!dspc_mode) //altitude mode
@@ -1236,7 +1236,7 @@ void save_eeprom()
   }
 }
 
-void read_eeprom()
+static void read_eeprom()
 {
   byte* p = (byte*)(void*)&variable;
   int i;
@@ -1269,7 +1269,7 @@ void save_shutdown()
 #endif
 }
 
-void handle_unused_pins()
+static void handle_unused_pins()
 {
 #if HARDWARE_REV >= 20
   //this saves 10-20 mA!
@@ -1288,7 +1288,7 @@ void handle_unused_pins()
 #endif
 }
 
-int analogRead_noISR(uint8_t pin) //this function makes sure that analogRead is never used in interrupt. only important for X-Cell RT bottom brackets
+static int analogRead_noISR(uint8_t pin) //this function makes sure that analogRead is never used in interrupt. only important for X-Cell RT bottom brackets
 {
 #ifdef SUPPORT_XCELL_RT
     analogRead_in_use = true; //this prevents analogReads in Interrupt from Thun bracket
